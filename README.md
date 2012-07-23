@@ -23,65 +23,65 @@ The Smith et al. code OpenBUGS code is below, from their supplemental informatio
 
 
 
-model{
-  for(i in 1:N) {
-    iz[i] <- step(sna[i] - 1)
-    NBProbZero[i] <- pow(1 + lambda[i] / delta, -delta)
-    nllZero[i] <- -log(p[i] + (1 - p[i])*NBProbZero[i])
-    llNB[i] <- (loggam(delta + sna[i]) - loggam(delta) - loggam(sna[i] + 1) + sna[i] * log(lambda[i]) - sna[i] * log(delta) - (delta + sna[i]) * log(1 + lambda[i] / delta))
-    nllNonZero[i] <- -(log(1 - p[i]) + llNB[i])	
-    nll[i] <- iz[i] * nllNonZero[i] + (1 - iz[i]) * nllZero[i]	
-    zero[i] <- 0
-    zero[i] ~ dpois(nll[i]) 
+	model{
+	  for(i in 1:N) {
+	    iz[i] <- step(sna[i] - 1)
+	    NBProbZero[i] <- pow(1 + lambda[i] / delta, -delta)
+	    nllZero[i] <- -log(p[i] + (1 - p[i])*NBProbZero[i])
+	    llNB[i] <- (loggam(delta + sna[i]) - loggam(delta) - loggam(sna[i] + 1) + sna[i] * log(lambda[i]) - sna[i] * log(delta) - (delta + sna[i]) * log(1 + lambda[i] / delta))
+	    nllNonZero[i] <- -(log(1 - p[i]) + llNB[i])	
+	    nll[i] <- iz[i] * nllNonZero[i] + (1 - iz[i]) * nllZero[i]	
+	    zero[i] <- 0
+	    zero[i] ~ dpois(nll[i]) 
   
-    logit(p[i]) <- gamma0 + gamma1*eta[i]
-    log(lambda[i]) <- eta[i]
-    eta[i] <- llam.area[area[i]] + beta.season*season[i] + beta.year[year[i]]
-  }
+	    logit(p[i]) <- gamma0 + gamma1*eta[i]
+	    log(lambda[i]) <- eta[i]
+	    eta[i] <- llam.area[area[i]] + beta.season*season[i] + beta.year[year[i]]
+	  }
     
-  # priors  
-  delta ~ dgamma(0.0001,0.0001)
-  gamma0 ~ dnorm(0.0, 0.01)
-  gamma1 ~ dnorm(0.0, 0.01)
+	  # priors  
+	  delta ~ dgamma(0.0001,0.0001)
+	  gamma0 ~ dnorm(0.0, 0.01)
+	  gamma1 ~ dnorm(0.0, 0.01)
 
-  for(j in 1:6) { llam.area[j] <- llam.reserve[reserve.in.area[j]] + beta.area[j]
-                  beta.area[j] ~ dnorm(0.0, tau.area)  }
+	  for(j in 1:6) { llam.area[j] <- llam.reserve[reserve.in.area[j]] + beta.area[j]
+	                  beta.area[j] ~ dnorm(0.0, tau.area)  }
 
-  llam.reserve[1] <- beta0 - beta.reserve
-  llam.reserve[2] <- beta0 + beta.reserve
+	  llam.reserve[1] <- beta0 - beta.reserve
+	  llam.reserve[2] <- beta0 + beta.reserve
 	
-  beta0 ~ dnorm(0.0, 0.01)
-  beta.reserve ~ dnorm(0.0, 0.01)
-  beta.season ~ dnorm(0.0, 0.01)
+	  beta0 ~ dnorm(0.0, 0.01)
+	  beta.reserve ~ dnorm(0.0, 0.01)
+	  beta.season ~ dnorm(0.0, 0.01)
   	
-  for(m in 1:9) { beta.year[m] ~ dnorm(0.0,tau.year) }
+	  for(m in 1:9) { beta.year[m] ~ dnorm(0.0,tau.year) }
 	
-  # hyperpriors
-  tau.year <- pow(sd.year, -2)
-  sd.year ~ dunif(0,5)
-  nlh.year <- log(1 + sd.year*sd.year)
-  z.year <- 0
-  z.year ~ dpois(nlh.year)
+	  # hyperpriors
+	  tau.year <- pow(sd.year, -2)
+	  sd.year ~ dunif(0,5)
+	  nlh.year <- log(1 + sd.year*sd.year)
+	  z.year <- 0
+	  z.year ~ dpois(nlh.year)
 
-  tau.area <- pow(sd.area, -2)
-  sd.area ~ dunif(0,5)
-  nlh.area <- log(1 + sd.area*sd.area)
-  z.area <- 0
-  z.area ~ dpois(nlh.area)
+	  tau.area <- pow(sd.area, -2)
+	  sd.area ~ dunif(0,5)
+	  nlh.area <- log(1 + sd.area*sd.area)
+	  z.area <- 0
+	  z.area ~ dpois(nlh.area)
 
-  ## CALCULATIONS
+	  ## CALCULATIONS
 
-  # variance components for fixed effects
-  sd.reserve <- sd(llam.reserve[])
-  sd.season <- sqrt( 2* pow(beta.season, 2) )
+	  # variance components for fixed effects
+	  sd.reserve <- sd(llam.reserve[])
+	  sd.season <- sqrt( 2* pow(beta.season, 2) )
 
-  # Means for no-reserve and reserve
-  p.nores <- 1 / (1 + exp( -( gamma0 + gamma1*llam.reserve[1] )) )
-  p.res <-  1 / (1 + exp( -( gamma0 + gamma1*llam.reserve[2] )) )
-  mean.nores <- (1 - p.nores) * exp(llam.reserve[1])
-  mean.res <- (1 - p.res) * exp(llam.reserve[2])
-  res.effect <- mean.res / mean.nores
-}
+	  # Means for no-reserve and reserve
+	  p.nores <- 1 / (1 + exp( -( gamma0 + gamma1*llam.reserve[1] )) )
+	  p.res <-  1 / (1 + exp( -( gamma0 + gamma1*llam.reserve[2] )) )
+	  mean.nores <- (1 - p.nores) * exp(llam.reserve[1])
+	  mean.res <- (1 - p.res) * exp(llam.reserve[2])
+	  res.effect <- mean.res / mean.nores
+	}
 
 
 
