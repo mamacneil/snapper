@@ -56,7 +56,7 @@ season = array([-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 1, 1, 1, 1, 1, 1, 1])
 
 # Python indexer for season
-Is = step(season)
+Is = season>0
 
 year = array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 
