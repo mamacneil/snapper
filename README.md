@@ -1,7 +1,7 @@
 snapper
 =======
 
-PyMC implementation of Smith et al. (2012) linked occupancy-abundance model
+PyMC implementation of Smith et al. (2012) linked occupancy-abundance model: http://www.esajournals.org/doi/abs/10.1890/12-0460.1
 
 Created by M. Aaron MacNeil on 20/07/12.
 
