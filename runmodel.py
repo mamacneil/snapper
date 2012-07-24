@@ -10,8 +10,8 @@ from pymc import MCMC, BinaryMetropolis, Metropolis, AdaptiveMetropolis
 from pymc import Matplot as mp
 
 
-M = MCMC(models)
-xex = 6
+M = MCMC(snapper)
+xex = 5
 M.isample(10**xex, 10**xex-10**(xex-1), thin=100, verbose=2)
 
 try:
