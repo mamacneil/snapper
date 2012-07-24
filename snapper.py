@@ -31,22 +31,23 @@ beta_rez = Lambda('beta_rez', lambda b0=beta0,b1=beta_reserve: array([b0-b1,b0+b
 # Season effect
 beta_season = Normal('beta_season', mu=0.0, tau=0.01, value=0.)
 # Area effect
-sd_area = Uniform('sd_area', lower=0, upper=5, value=0.4)
-tau_area = Lambda('tau_area', lambda sd=sd_area: sd**-2)
+@stochastic
+def tau_area(value=1.91, alpha=0, beta=100):
+    return half_cauchy_like(value,alpha,beta)
 beta_area = Normal('beta_area', mu=0.0, tau=tau_area, value=np.zeros(6))
 # Reserve given area
 beta_rez_area = Lambda('beta_rez_area', lambda br=beta_rez[Ir],ba=beta_area: br+ba)
 # Year effect
-sd_year = Uniform('sd_year', lower=0, upper=5, value=0.4)
-tau_year = Lambda('tau_year', lambda sd=sd_year: sd**-2)
+@stochastic
+def tau_year(value=1.91, alpha=0, beta=100):
+    return half_cauchy_like(value,alpha,beta)
 beta_year = Normal('beta_year', mu=0.0, tau=tau_year, value=np.zeros(9))
-
 
 # = = = = = = = = = = = = Likelihood
 # Count model
 eta = Lambda('eta', lambda b0=beta_rez_area[Ia],b1=beta_season,b2=beta_year[Iy]: b0+b1*season+b2, trace=False)
 # Link function for negative binomial
-lambduh = Lambda('lambduh', lambda e=eta: exp(e), trace=False)
+lambduh = Lambda('lambduh', lambda e=eta: np.exp(e), trace=False)
 # Zero model
 pzero = Lambda('pzero', lambda g0=gamma0,g1=gamma1,eta=eta: invlogit(g0+g1*eta), trace=False)
 
@@ -56,9 +57,9 @@ def zinb(value=sna, mu=lambduh, alpha=delta, psi=pzero):
     # Initialise likeihood
     like = 0.0
     # Add zero component; zero probability + P(NB==0); value flags for non-zeros to cancel out
-    like += sum((np.log(psi + (1.-psi)*(alpha/(mu+alpha))**alpha))*Iz)
+    like += np.sum((np.log(psi + (1.-psi)*(alpha/(mu+alpha))**alpha))*Iz)
     # Add count component; non-zero probability + P(NB>0); value flags for zeros to cancel out
-    like += sum((np.log(1.-psi) + np.log(gammaf(alpha+value))-np.log((ft(value)*gammaf(alpha))) + alpha*np.log(alpha/(mu+alpha)) + value*np.log(mu/(mu+alpha)))*Ic)
+    like += np.sum((np.log(1.-psi) + np.log(gammaf(alpha+value))-np.log((ft(value)*gammaf(alpha))) + alpha*np.log(alpha/(mu+alpha)) + value*np.log(mu/(mu+alpha)))*Ic)
     return like
 
 
