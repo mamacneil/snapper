@@ -14,11 +14,6 @@ M = MCMC(snapper)
 xex = 5
 M.isample(10**xex, 10**xex-10**(xex-1), thin=100, verbose=2)
 
-try:
-    os.mkdir('Outputs')
-except OSError:
-    pass
-os.chdir('Outputs')
+
 M.write_csv("results.csv")
 mp.plot(M)
-os.chdir('..')
